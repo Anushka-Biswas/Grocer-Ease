@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Optimized Price for {{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Price Optimization Results for {{ product.name }}</h1>
+    
+    {% if optimized_price %}
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <h2 class="text-2xl font-bold mb-4">Optimized Price</h2>
+        <p class="text-xl">₹{{ "%.2f"|format(optimized_price) }} per kg</p>
+    </div>
+    {% else %}
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <p class="text-xl">Unable to optimize price due to insufficient data.</p>
+    </div>
+    {% endif %}
+
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <h2 class="text-2xl font-bold mb-4">Market Prices</h2>
+        <ul class="list-disc pl-5">
+        {% for price in market_prices %}
+            <li class="mb-2">
+                {% if 'price' in price %}
+                {{ price['type'] }}: {{ price['price'] }} per {{ price['unit'] }}
+                {% else %}
+                {{ price['type'] }}: Price not available
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <h2 class="text-2xl font-bold mb-4">Online Retail Prices</h2>
+        <ul class="list-disc pl-5">
+        {% for price in online_prices %}
+            <li class="mb-2">
+                {% if 'price_per_kg' in price %}
+                {{ price['source'] }}: {{ price['price_per_kg'] }} per kg
+                {% else %}
+                {{ price['source'] }}: Price not available
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+
+    <div class="mt-6">
+        <form action="{{ url_for('seller.update_price', product_id=product.id) }}" method="POST" class="inline">
+            <input type="hidden" name="new_price" value="{{ optimized_price }}">
+            <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-4">
+                Update Product Price
+            </button>
+        </form>
+        <a href="{{ url_for('seller.inventory') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+            Back to Inventory
+        </a>
+    </div>
+</div>
+{% endblock %}
+

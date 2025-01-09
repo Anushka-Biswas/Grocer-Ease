@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Order Details{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="p-6 border-b">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-900">Order #{{ order.id }}</h1>
+                <div class="flex items-center gap-2">
+                    {% if current_user.role == 'seller' and order.status == 'paid' %}
+                        <form action="{{ url_for('seller.update_order_status', order_id=order.id) }}" method="POST">
+                            <input type="hidden" name="status" value="dispatched">
+                            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                                Mark as Dispatched
+                            </button>
+                        </form>
+                    {% elif current_user.role == 'admin' %}
+                        <form action="{{ url_for('admin.update_order_status', order_id=order.id) }}" method="POST" class="inline">
+                            <select name="status" class="rounded border-gray-300 mr-2">
+                                <option value="out_for_delivery" {% if order.status == 'out_for_delivery' %}selected{% endif %}>Out for Delivery</option>
+                                <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                            </select>
+                            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                                Update Status
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 border-b">
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <h2 class="text-lg font-semibold mb-2">Order Information</h2>
+                    <p class="text-gray-600">Date: {{ order.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                    <p class="text-gray-600">Status: 
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium
+                            {% if order.status == 'paid' %} bg-yellow-100 text-yellow-800
+                            {% elif order.status == 'dispatched' %} bg-blue-100 text-blue-800
+                            {% elif order.status == 'out_for_delivery' %} bg-purple-100 text-purple-800
+                            {% elif order.status == 'delivered' %} bg-green-100 text-green-800
+                            {% else %} bg-gray-100 text-gray-800
+                            {% endif %}">
+                            {{ order.status|title }}
+                        </span>
+                    </p>
+                    <p class="text-gray-600">Total: ₹{{ "%.2f"|format(order.total_price) }}</p>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold mb-2">Customer Information</h2>
+                    <p class="text-gray-600">Email: {{ order.customer.email }}</p>
+                    <p class="text-gray-600">Phone: {{ order.delivery_address.phone_number }}</p>
+                    <p class="text-gray-600">Address: {{ order.delivery_address.address }}, {{ order.delivery_address.city }}, {{ order.delivery_address.state }} - {{ order.delivery_address.pincode }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6">
+            <h2 class="text-lg font-semibold mb-4">Order Items</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for item in order.products %}
+                            {% if item.product.seller == current_user %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.product.name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.quantity }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{{ "%.2f"|format(item.product.price) }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{{ "%.2f"|format(item.product.price * item.quantity) }}</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="p-6 bg-gray-50 border-t">
+            <div class="flex justify-between items-center">
+                <a href="{{ url_for('seller.orders') }}" class="text-blue-600 hover:text-blue-800">← Back to Orders</a>
+                {% if order.status == 'delivered' %}
+                    <span class="text-green-600 font-medium">Order Completed</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

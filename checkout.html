@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout - GrocerEase{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8" x-data="{ showPayment: false }">
+    <h1 class="text-3xl font-bold mb-6">Checkout</h1>
+    {% if cart and cart.items %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-4">Order Summary</h2>
+                <table class="w-full mb-4">
+                    <thead class="border-b">
+                        <tr>
+                            <th class="text-left pb-2">Product</th>
+                            <th class="text-left pb-2">Quantity</th>
+                            <th class="text-right pb-2">Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart.items %}
+                            <tr>
+                                <td class="py-2">{{ item.product.name }}</td>
+                                <td class="py-2">{{ item.quantity }}</td>
+                                <td class="text-right py-2">₹{{ "%.2f"|format(item.product.price * item.quantity) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="border-t">
+                        <tr>
+                            <td colspan="2" class="pt-2 font-bold">Total:</td>
+                            <td class="text-right pt-2 font-bold">₹{{ "%.2f"|format(cart.get_total()) }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-4">Checkout Information</h2>
+                <form method="post" action="{{ url_for('customer.checkout') }}">
+                    <div x-show="!showPayment">
+                        <h3 class="text-xl font-semibold mb-2">Delivery Information</h3>
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <label for="phone_number" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                                <input type="tel" id="phone_number" name="phone_number" value="{{ current_user.phone_number }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
+                            </div>
+                            <div>
+                                <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
+                                <input type="text" id="address" name="address" value="{{ current_user.address }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
+                            </div>
+                            <div>
+                                <label for="city" class="block text-sm font-medium text-gray-700">City</label>
+                                <input type="text" id="city" name="city" value="{{ current_user.city }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
+                            </div>
+                            <div>
+                                <label for="state" class="block text-sm font-medium text-gray-700">State</label>
+                                <input type="text" id="state" name="state" value="{{ current_user.state }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
+                            </div>
+                            <div>
+                                <label for="pincode" class="block text-sm font-medium text-gray-700">Pincode</label>
+                                <input type="text" id="pincode" name="pincode" value="{{ current_user.pincode }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <button type="button" @click="showPayment = true" class="w-full bg-green-600 text-white px-6 py-3 rounded-full text-lg hover:bg-green-700 transition duration-300">Proceed to Payment</button>
+                        </div>
+                    </div>
+                    <div x-show="showPayment">
+                        <h3 class="text-xl font-semibold mb-2">Payment Information</h3>
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <label for="card_number" class="block text-sm font-medium text-gray-700">Card Number</label>
+                                <input type="text" id="card_number" name="card_number" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50" placeholder="1234 5678 9012 3456">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="expiry_date" class="block text-sm font-medium text-gray-700">Expiry Date</label>
+                                    <input type="text" id="expiry_date" name="expiry_date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50" placeholder="MM/YY">
+                                </div>
+                                <div>
+                                    <label for="cvv" class="block text-sm font-medium text-gray-700">CVV</label>
+                                    <input type="text" id="cvv" name="cvv" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50" placeholder="123">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-between">
+                            <button type="button" @click="showPayment = false" class="bg-gray-300 text-gray-700 px-6 py-3 rounded-full text-lg hover:bg-gray-400 transition duration-300">Back to Address</button>
+                            <button type="submit" class="bg-green-600 text-white px-6 py-3 rounded-full text-lg hover:bg-green-700 transition duration-300">Place Order</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% else %}
+        <p class="text-center text-gray-600">Your cart is empty.</p>
+    {% endif %}
+    <div class="text-center mt-8">
+        <a href="{{ url_for('customer.cart') }}" class="text-green-600 hover:text-green-700 transition duration-300">Back to Cart</a>
+    </div>
+</div>
+{% endblock %}
+

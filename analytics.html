@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Seller Analytics</h1>
+
+<div class="analytics-summary">
+    <div class="summary-item">
+        <h3>Total Revenue</h3>
+        <p>₹{{ total_revenue|round(2) }}</p>
+    </div>
+    <div class="summary-item">
+        <h3>Total Orders</h3>
+        <p>{{ total_orders }}</p>
+    </div>
+    <div class="summary-item">
+        <h3>Average Order Value</h3>
+        <p>₹{{ avg_order_value|round(2) }}</p>
+    </div>
+</div>
+
+<div class="chart-container">
+    <h2>Daily Sales Revenue</h2>
+    <img src="data:image/png;base64,{{ sales_chart }}" alt="Daily Sales Revenue Chart">
+</div>
+
+<div class="chart-container">
+    <h2>Top 10 Products by Revenue</h2>
+    <img src="data:image/png;base64,{{ top_products_chart }}" alt="Top 10 Products by Revenue Chart">
+</div>
+{% endblock %}
